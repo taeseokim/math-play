@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>숫자 놀이터</title>
+  <meta name="description" content="유치원·초등학생을 위한 상호작용 수학 놀이 — 수 세기, 셈하기, 크기 비교, 규칙 찾기" />
+  <meta name="theme-color" content="#FFF4E0" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎈</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="logo" id="homeBtn" aria-label="처음 화면으로">🎈 <span>숫자 놀이터</span></button>
+    <div class="toggles">
+      <button class="toggle" id="soundBtn" aria-pressed="true" title="효과음 켜기/끄기">🔔</button>
+      <button class="toggle" id="voiceBtn" aria-pressed="true" title="문제 읽어주기 켜기/끄기">🗣️</button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div id="confetti" aria-hidden="true"></div>
+
+  <noscript>이 놀이는 자바스크립트를 켜야 할 수 있어요.</noscript>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
