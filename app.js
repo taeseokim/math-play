@@ -6,7 +6,8 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 const ROUND = 10; // 한 판 문제 수
 
 const GAMES = {
-  count:   { title: '수 세기',   icon: '🧮', desc: '몇 개인지 세어 봐요',   color: 'var(--blue)' },
+  circle:  { title: '원 그리기', icon: '⭕', desc: '완벽한 원을 그려 봐요', color: 'var(--blue)',
+             embed: 'https://bychoi-space.github.io/circle_game/index.html', credit: '노원수학문화관 원 그리기 게임' },
   calc:    { title: '셈하기',    icon: '➕', desc: '더하고 빼고 곱해요',     color: 'var(--coral)' },
   compare: { title: '크기 비교', icon: '⚖️', desc: '어느 쪽이 더 클까요?',  color: 'var(--mint)' },
   pattern: { title: '규칙 찾기', icon: '🧩', desc: '다음에 올 것은?',        color: 'var(--purple)' },
@@ -148,34 +149,6 @@ function tenFrames(emoji, n) {
    i: 몇 번째 문제인지 (0~9) — 뒤로 갈수록 조금씩 어려워짐
    ════════════════════════════════════════════ */
 const MAKERS = {
-  count: {
-    k(i) {
-      const [e, name] = pick(THINGS);
-      const n = rand(1, Math.min(10, 4 + i));
-      return { prompt: `${name}${hasBatchim(name) ? '은' : '는'} 몇 개일까요?`,
-        speak: `${iga(name)} 몇 개 있을까요? 하나씩 세어 봐요.`,
-        visual: things(e, n), choices: numChoices(n, { spread: 2, min: 1 }), answer: String(n) };
-    },
-    low(i) {
-      const [e, name] = pick(THINGS);
-      const n = rand(i < 5 ? 6 : 11, i < 5 ? 15 : 20);
-      return { prompt: '모두 몇 개일까요?',
-        speak: `${iga(name)} 모두 몇 개일까요? 다섯 개씩, 열 개씩 묶어서 세어 봐요.`,
-        visual: tenFrames(e, n), choices: numChoices(n, { spread: 3, min: 1 }), answer: String(n) };
-    },
-    mid(i) {
-      const tens = rand(1, i < 5 ? 4 : 7), ones = rand(0, 9), n = tens * 10 + ones;
-      let sticks = '', cubes = '';
-      for (let t = 0; t < tens; t++) sticks += `<div class="stick" style="animation-delay:${t * 60}ms">${'<i></i>'.repeat(10)}</div>`;
-      for (let o = 0; o < ones; o++) cubes += `<i class="one" style="animation-delay:${(tens + o) * 50}ms"></i>`;
-      return { prompt: '블록은 모두 몇 개일까요?',
-        speak: `열 개짜리 막대가 ${tens}개, 낱개가 ${ones}개 있어요. 모두 몇 개일까요?`,
-        visual: `<div class="blocks">${sticks}${ones ? `<div class="ones">${cubes}</div>` : ''}</div>
-                 <div class="legend">파란 막대 1개 = 10개 · 노란 블록 1개 = 1개</div>`,
-        choices: numChoices(n, { spread: 2, min: 1, extra: [n + 10, n - 10, ones * 10 + tens] }), answer: String(n) };
-    },
-  },
-
   calc: {
     k(i) {
       const [e, name] = pick(THINGS);
@@ -441,7 +414,7 @@ function renderHome() {
     store.set('nickname', state.nickname);
     sfx.tap(); renderPick();
   };
-  app.querySelector('#rank').onclick = () => { sfx.tap(); renderBoard('count', state.level); };
+  app.querySelector('#rank').onclick = () => { sfx.tap(); renderBoard('calc', state.level); };
 }
 
 /* ════════════════════════════════════════════
@@ -460,7 +433,7 @@ function renderPick() {
     <h2 class="title">어떤 놀이를 할까요?</h2>
     <div class="games">
       ${Object.entries(GAMES).map(([k, g]) => {
-        const best = bestLocal(k, state.level);
+        const best = g.embed ? null : bestLocal(k, state.level);
         return `<button class="game" data-g="${k}" style="--c:${g.color}">
           <span class="ic">${g.icon}</span><span class="nm">${g.title}</span><span class="ds">${g.desc}</span>
           ${best !== null ? `<span class="best">내 최고 ⭐ ${best}</span>` : ''}
@@ -470,9 +443,34 @@ function renderPick() {
     <div class="center"><button class="ghost" id="rank">🏆 순위표 보기</button></div>
   </section>`;
   app.querySelector('#change').onclick = () => { sfx.tap(); renderHome(); };
-  app.querySelector('#rank').onclick = () => { sfx.tap(); renderBoard('count', state.level); };
-  app.querySelectorAll('.game').forEach(b => b.onclick = () => { sfx.tap(); startGame(b.dataset.g); });
+  app.querySelector('#rank').onclick = () => { sfx.tap(); renderBoard('calc', state.level); };
+  app.querySelectorAll('.game').forEach(b => b.onclick = () => {
+    sfx.tap();
+    GAMES[b.dataset.g].embed ? renderEmbed(b.dataset.g) : startGame(b.dataset.g);
+  });
   say(`${state.nickname}, 어떤 놀이를 할까요?`);
+}
+
+/* ════════════════════════════════════════════
+   화면: 외부 놀이 (다른 곳에서 만든 게임을 그대로 띄움)
+   ════════════════════════════════════════════ */
+function renderEmbed(key) {
+  stopTalk();
+  const g = GAMES[key];
+  app.innerHTML = `
+  <section class="screen embed">
+    <div class="playbar">
+      <button class="close" id="quit" aria-label="놀이 고르기로 돌아가기">✕</button>
+      <h2 class="embed-title">${g.icon} ${g.title}</h2>
+      <a class="ghost newtab" href="${g.embed}" target="_blank" rel="noopener">새 창 ↗</a>
+    </div>
+    <div class="embed-frame">
+      <iframe src="${g.embed}" title="${esc(g.credit)}" allow="fullscreen" loading="eager"></iframe>
+    </div>
+    <p class="note">출처: <a href="${g.embed}" target="_blank" rel="noopener">${esc(g.credit)}</a> · 화면이 안 보이면 ‘새 창’을 눌러 주세요.</p>
+  </section>`;
+  app.querySelector('#quit').onclick = () => { sfx.tap(); renderPick(); };
+  say('빨간 점을 가운데에 두고 동그라미를 그려 봐요.');
 }
 
 /* ════════════════════════════════════════════
@@ -602,7 +600,7 @@ async function renderBoard(game, level) {
   <section class="screen">
     <h2 class="title">🏆 순위표</h2>
     <div class="tabs" role="group" aria-label="놀이">
-      ${Object.entries(GAMES).map(([k, g]) => `<button class="tab" data-g="${k}" aria-pressed="${k === game}">${g.icon} ${g.title}</button>`).join('')}
+      ${Object.entries(GAMES).filter(([, g]) => !g.embed).map(([k, g]) => `<button class="tab" data-g="${k}" aria-pressed="${k === game}">${g.icon} ${g.title}</button>`).join('')}
     </div>
     <div class="tabs" role="group" aria-label="단계">
       ${Object.entries(LEVELS).map(([k, l]) => `<button class="tab lv" data-l="${k}" aria-pressed="${k === level}">${l.icon} ${l.label}${l.sub === '학년' ? '학년' : ''}</button>`).join('')}

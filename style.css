@@ -203,6 +203,16 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
 .feedback.good { color: var(--good); }
 .feedback.bad { color: var(--coral-dark); }
 
+/* ── 외부 놀이 화면 ─────────────────────────── */
+.embed-title { flex: 1; font-size: 1.5rem; text-align: center; color: var(--blue); }
+.newtab { text-decoration: none; flex: none; color: var(--ink); }
+.embed-frame {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  overflow: hidden; height: calc(100dvh - 210px); min-height: 520px;
+}
+.embed-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.note a { color: inherit; }
+
 /* ── 결과 화면 ─────────────────────────── */
 .result { text-align: center; }
 .medals { font-size: 4.4rem; letter-spacing: 6px; margin: 8px 0; }
