@@ -123,6 +123,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   padding: 22px 12px; text-align: center; border-bottom: 8px solid var(--c);
   transition: transform .12s;
 }
+.game:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .game:hover { transform: translateY(-3px) rotate(-1deg); }
 .game:active { transform: translateY(2px); }
 .game .ic { font-size: 3.4rem; display: block; }

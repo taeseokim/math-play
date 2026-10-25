@@ -7,10 +7,15 @@ const ROUND = 10; // 한 판 문제 수
 
 const GAMES = {
   circle:  { title: '원 그리기', icon: '⭕', desc: '완벽한 원을 그려 봐요', color: 'var(--blue)',
-             embed: 'https://bychoi-space.github.io/circle_game/index.html', credit: '노원수학문화관 원 그리기 게임' },
+             embed: 'https://bychoi-space.github.io/circle_game/index.html', credit: '노원수학문화관 원 그리기 게임',
+             intro: '빨간 점을 가운데에 두고 동그라미를 그려 봐요.' },
   calc:    { title: '셈하기',    icon: '➕', desc: '더하고 빼고 곱해요',     color: 'var(--coral)' },
   compare: { title: '크기 비교', icon: '⚖️', desc: '어느 쪽이 더 클까요?',  color: 'var(--mint)' },
   pattern: { title: '규칙 찾기', icon: '🧩', desc: '다음에 올 것은?',        color: 'var(--purple)' },
+  puzzle:  { title: '블록 맞추기', icon: '🔢', desc: '숫자 블록을 순서대로 밀어요', color: '#C9631F',
+             embed: lv => `games/puzzle/index.html?level=${{ k: 'easy', low: 'medium', mid: 'hard' }[lv]}`,
+             sizes: { k: '3×3', low: '4×4', mid: '5×5' },
+             intro: '빈칸 옆 블록을 눌러서 1부터 순서대로 맞춰 봐요.' },
 };
 
 const LEVELS = {
@@ -435,7 +440,7 @@ function renderPick() {
       ${Object.entries(GAMES).map(([k, g]) => {
         const best = g.embed ? null : bestLocal(k, state.level);
         return `<button class="game" data-g="${k}" style="--c:${g.color}">
-          <span class="ic">${g.icon}</span><span class="nm">${g.title}</span><span class="ds">${g.desc}</span>
+          <span class="ic">${g.icon}</span><span class="nm">${g.title}</span><span class="ds">${g.desc}${g.sizes ? ` · ${g.sizes[state.level]}` : ''}</span>
           ${best !== null ? `<span class="best">내 최고 ⭐ ${best}</span>` : ''}
         </button>`;
       }).join('')}
@@ -457,20 +462,23 @@ function renderPick() {
 function renderEmbed(key) {
   stopTalk();
   const g = GAMES[key];
+  const url = typeof g.embed === 'function' ? g.embed(state.level) : g.embed;
   app.innerHTML = `
   <section class="screen embed">
     <div class="playbar">
       <button class="close" id="quit" aria-label="놀이 고르기로 돌아가기">✕</button>
-      <h2 class="embed-title">${g.icon} ${g.title}</h2>
-      <a class="ghost newtab" href="${g.embed}" target="_blank" rel="noopener">새 창 ↗</a>
+      <h2 class="embed-title" style="color:${g.color}">${g.icon} ${g.title}</h2>
+      <a class="ghost newtab" href="${url}" target="_blank" rel="noopener">새 창 ↗</a>
     </div>
     <div class="embed-frame">
-      <iframe src="${g.embed}" title="${esc(g.credit)}" allow="fullscreen" loading="eager"></iframe>
+      <iframe src="${url}" title="${esc(g.title)}" allow="fullscreen" loading="eager"></iframe>
     </div>
-    <p class="note">출처: <a href="${g.embed}" target="_blank" rel="noopener">${esc(g.credit)}</a> · 화면이 안 보이면 ‘새 창’을 눌러 주세요.</p>
+    ${g.credit
+      ? `<p class="note">출처: <a href="${url}" target="_blank" rel="noopener">${esc(g.credit)}</a> · 화면이 안 보이면 ‘새 창’을 눌러 주세요.</p>`
+      : `<p class="note">${esc(LEVELS[state.level].label)}${LEVELS[state.level].sub === '학년' ? '학년' : ''} 단계 · ${g.sizes ? g.sizes[state.level] : ''} 퍼즐이에요. 게임 안에서 난이도를 바꿀 수도 있어요.</p>`}
   </section>`;
   app.querySelector('#quit').onclick = () => { sfx.tap(); renderPick(); };
-  say('빨간 점을 가운데에 두고 동그라미를 그려 봐요.');
+  if (g.intro) say(g.intro);
 }
 
 /* ════════════════════════════════════════════

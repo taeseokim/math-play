@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블록 맞추기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800&display=swap">
+<style>
+  :root {
+    --wall: #e3e2da;
+    --tray: #d9c6a0;
+    --tray-edge: #c3ac80;
+    --tray-grain: rgba(140, 112, 68, 0.10);
+    --slot: #b89a6d;
+    --slot-shadow: rgba(60, 42, 16, 0.55);
+    --ink: #382c1e;
+    --ink-soft: #6b5c45;
+    --label-bg: #f4ecd8;
+    --label-edge: #cbb98d;
+    --plate-bg: rgba(255, 255, 255, 0.55);
+    --lamp: #c9631f;
+    --lamp-ink: #ffffff;
+    --btn-quiet-bg: #ece3cd;
+    --btn-quiet-ink: #4a3c28;
+    --win-bg: #dcecd9;
+    --win-ink: #2f6b3c;
+    --focus-ring: #c9631f;
+    --tile-s: 58%;
+    --tile-l: 53%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --wall: #1a1815;
+      --tray: #4a3624;
+      --tray-edge: #33241790;
+      --tray-grain: rgba(0, 0, 0, 0.22);
+      --slot: #2c1e12;
+      --slot-shadow: rgba(0, 0, 0, 0.7);
+      --ink: #f2e9d8;
+      --ink-soft: #c6b393;
+      --label-bg: #5a4530;
+      --label-edge: #71583a;
+      --plate-bg: rgba(0, 0, 0, 0.22);
+      --lamp: #e8a23c;
+      --lamp-ink: #2a1c08;
+      --btn-quiet-bg: #3a2c1c;
+      --btn-quiet-ink: #ecdfc4;
+      --win-bg: #22392a;
+      --win-ink: #8fd6a4;
+      --focus-ring: #e8a23c;
+      --tile-s: 62%;
+      --tile-l: 60%;
+    }
+  }
+  :root[data-theme="dark"] {
+    --wall: #1a1815;
+    --tray: #4a3624;
+    --tray-edge: #33241790;
+    --tray-grain: rgba(0, 0, 0, 0.22);
+    --slot: #2c1e12;
+    --slot-shadow: rgba(0, 0, 0, 0.7);
+    --ink: #f2e9d8;
+    --ink-soft: #c6b393;
+    --label-bg: #5a4530;
+    --label-edge: #71583a;
+    --plate-bg: rgba(0, 0, 0, 0.22);
+    --lamp: #e8a23c;
+    --lamp-ink: #2a1c08;
+    --btn-quiet-bg: #3a2c1c;
+    --btn-quiet-ink: #ecdfc4;
+    --win-bg: #22392a;
+    --win-ink: #8fd6a4;
+    --focus-ring: #e8a23c;
+    --tile-s: 62%;
+    --tile-l: 60%;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wall);
+    font-family: "Nunito Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    padding: 28px 18px;
+  }
+
+  .tray {
+    width: 100%;
+    max-width: 420px;
+    background:
+      repeating-linear-gradient(100deg, var(--tray-grain) 0 2px, transparent 2px 14px),
+      var(--tray);
+    border-radius: 28px;
+    padding: 26px 24px 28px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.25) inset,
+      0 -6px 0 var(--tray-edge) inset,
+      0 18px 34px rgba(30, 20, 6, 0.28);
+    transition: max-width 0.25s ease;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .label {
+    background: var(--label-bg);
+    border: 2px solid var(--label-edge);
+    border-radius: 10px;
+    padding: 8px 16px;
+    transform: rotate(-1.2deg);
+  }
+  .label h1 {
+    margin: 0;
+    font-family: "Baloo 2", "Nunito Sans", sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.2px;
+  }
+  .label p {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .plates {
+    display: flex;
+    gap: 8px;
+  }
+  .plate {
+    background: var(--plate-bg);
+    border-radius: 12px;
+    padding: 7px 12px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .plate .k {
+    display: block;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--ink-soft);
+    font-weight: 800;
+  }
+  .plate .v {
+    display: block;
+    font-family: "Baloo 2", sans-serif;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 1px;
+  }
+
+  .diff-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .diff-btn {
+    flex: 1;
+    font-family: "Nunito Sans", sans-serif;
+    border: 2px solid transparent;
+    background: var(--plate-bg);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    padding: 8px 6px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .diff-btn:hover { border-color: var(--lamp); }
+  .diff-btn.active {
+    background: var(--lamp);
+    color: var(--lamp-ink);
+  }
+  .diff-btn:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .photo-row {
+    margin-bottom: 16px;
+  }
+  .photo-setup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .photo-active {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--plate-bg);
+    border-radius: 14px;
+    padding: 8px 10px;
+  }
+  .photo-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+  }
+  .photo-active-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .photo-active-text strong {
+    display: block;
+    font-family: "Baloo 2", sans-serif;
+    font-size: 13.5px;
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--lamp);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .link-btn:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .win-banner {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    background: var(--win-bg);
+    color: var(--win-ink);
+    border-radius: 12px;
+    font-weight: 800;
+    font-family: "Baloo 2", sans-serif;
+    text-align: center;
+    padding: 0 14px;
+  }
+  .win-banner.show {
+    max-height: 60px;
+    opacity: 1;
+    padding: 11px 14px;
+    margin-bottom: 16px;
+    animation: winPop 0.5s ease;
+  }
+  @keyframes winPop {
+    0% { transform: scale(0.85); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  .board {
+    display: grid;
+    gap: 9px;
+    margin-bottom: 22px;
+    --tile-font: 28px;
+  }
+
+  .slot {
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    background: var(--slot);
+    box-shadow:
+      inset 0 3px 7px var(--slot-shadow),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .tile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 800;
+    font-size: var(--tile-font);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: hsl(var(--hue) var(--tile-s) var(--tile-l));
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -4px 0 rgba(0, 0, 0, 0.22),
+      0 3px 6px rgba(0, 0, 0, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .tile:active {
+    transform: translateY(2px) scale(0.97);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.22);
+  }
+  .tile:disabled {
+    cursor: default;
+    filter: saturate(0.7) brightness(0.9);
+    opacity: 0.55;
+  }
+  .tile:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .tile-badge {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    border-radius: 6px;
+    padding: 1px 5px;
+    pointer-events: none;
+  }
+
+  .tile.pop { animation: pop 0.22s ease; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.14); }
+    100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile, .win-banner, .tray { transition: none; animation: none; }
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  button.action {
+    font-family: "Nunito Sans", sans-serif;
+    border: none;
+    border-radius: 999px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  button.action:active { transform: translateY(1px); }
+  .btn-lamp {
+    background: var(--lamp);
+    color: var(--lamp-ink);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.18);
+  }
+  .btn-lamp:hover { filter: brightness(1.07); }
+  .btn-quiet {
+    background: var(--btn-quiet-bg);
+    color: var(--btn-quiet-ink);
+  }
+  .btn-quiet:hover { filter: brightness(0.96); }
+  button.action:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+  <main class="tray" id="tray">
+    <div class="header">
+      <div class="label">
+        <h1>블록 맞추기</h1>
+        <p id="subtitle">빈칸 옆 블록을 눌러 순서대로 맞춰보세요</p>
+      </div>
+      <div class="plates">
+        <div class="plate"><span class="k">이동</span><span class="v" id="moves">0</span></div>
+        <div class="plate"><span class="k">시간</span><span class="v" id="timer">00:00</span></div>
+        <div class="plate"><span class="k">최고</span><span class="v" id="best">-</span></div>
+      </div>
+    </div>
+
+    <div class="diff-row" role="tablist" aria-label="난이도 선택">
+      <button class="diff-btn" data-level="easy" role="tab">초급 3×3</button>
+      <button class="diff-btn" data-level="medium" role="tab">중급 4×4</button>
+      <button class="diff-btn" data-level="hard" role="tab">고급 5×5</button>
+    </div>
+
+    <input type="file" id="photoInput" accept="image/*" capture="user" hidden>
+    <div class="photo-row" id="photoRow"></div>
+
+    <div class="win-banner" id="winBanner">🎉 완성! 블록을 다 맞췄어요</div>
+
+    <div class="board" id="board" role="group"></div>
+
+    <div class="controls">
+      <button class="action btn-quiet" id="resetBtn">다시 섞기</button>
+      <button class="action btn-lamp" id="shuffleBtn">새 게임</button>
+    </div>
+
+    <p class="hint">방향키(↑↓←→)로도 빈칸을 움직일 수 있어요</p>
+  </main>
+
+<script>
+(() => {
+  const DIFFICULTIES = {
+    easy:   { cols: 3, rows: 3, label: '초급', trayMax: 420, gap: 9 },
+    medium: { cols: 4, rows: 4, label: '중급', trayMax: 460, gap: 7 },
+    hard:   { cols: 5, rows: 5, label: '고급', trayMax: 520, gap: 6 },
+  };
+  const LEVEL_KEY = 'blockPuzzleLevel';
+  const BEST_KEY = 'blockPuzzleBest';
+
+  // 숫자 놀이터에서 열 때는 주소의 ?level=easy|medium|hard 로 시작 난이도를 정한다.
+  const urlLevel = new URLSearchParams(location.search).get('level');
+  let level = DIFFICULTIES[urlLevel] ? urlLevel : (localStorage.getItem(LEVEL_KEY) || 'easy');
+  if (!DIFFICULTIES[level]) level = 'easy';
+
+  let COLS, ROWS, SIZE, SOLVED;
+  let tiles = [];
+  let moves = 0;
+  let timerInterval = null;
+  let seconds = 0;
+  let started = false;
+  let won = false;
+  let mode = 'numbers'; // 'numbers' | 'photo'
+  let photoDataUrl = null;
+
+  const trayEl = document.getElementById('tray');
+  const boardEl = document.getElementById('board');
+  const subtitleEl = document.getElementById('subtitle');
+  const movesEl = document.getElementById('moves');
+  const timerEl = document.getElementById('timer');
+  const bestEl = document.getElementById('best');
+  const winBanner = document.getElementById('winBanner');
+  const diffButtons = Array.from(document.querySelectorAll('.diff-btn'));
+  const photoRow = document.getElementById('photoRow');
+  const photoInput = document.getElementById('photoInput');
+
+  function loadBestMap() {
+    try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch { return {}; }
+  }
+
+  function renderBest() {
+    const best = loadBestMap()[level];
+    bestEl.textContent = best ? `${best.moves}회` : '-';
+  }
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function startTimer() {
+    stopTimer();
+    seconds = 0;
+    timerEl.textContent = formatTime(seconds);
+    timerInterval = setInterval(() => {
+      seconds++;
+      timerEl.textContent = formatTime(seconds);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function isSolved(arr) {
+    return arr.every((v, i) => v === SOLVED[i]);
+  }
+
+  function rowOf(idx) { return Math.floor(idx / COLS); }
+  function colOf(idx) { return idx % COLS; }
+
+  function neighborsOf(idx) {
+    const r = rowOf(idx);
+    const c = colOf(idx);
+    const result = [];
+    if (r > 0) result.push(idx - COLS);
+    if (r < ROWS - 1) result.push(idx + COLS);
+    if (c > 0) result.push(idx - 1);
+    if (c < COLS - 1) result.push(idx + 1);
+    return result;
+  }
+
+  function shuffle() {
+    let arr = [...SOLVED];
+    let emptyIdx = arr.indexOf(0);
+    let prevIdx = -1;
+    const shuffleMoves = 120 + SIZE * 25 + Math.floor(Math.random() * 30);
+
+    for (let i = 0; i < shuffleMoves; i++) {
+      const neighbors = neighborsOf(emptyIdx);
+      const candidates = neighbors.filter(n => n !== prevIdx);
+      const pickFrom = candidates.length ? candidates : neighbors;
+      const target = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+
+      [arr[emptyIdx], arr[target]] = [arr[target], arr[emptyIdx]];
+      prevIdx = emptyIdx;
+      emptyIdx = target;
+    }
+
+    if (isSolved(arr)) return shuffle();
+    return arr;
+  }
+
+  function isAdjacentToEmpty(idx) {
+    return neighborsOf(tiles.indexOf(0)).includes(idx);
+  }
+
+  // 숫자 1은 빨강 계열, 마지막 숫자는 보라 계열이 되도록 색상환 일부를 고르게 나눠 쓴다.
+  function hueForValue(val) {
+    const total = SIZE - 1;
+    if (total <= 1) return 0;
+    return Math.round(-8 + (306 * (val - 1)) / (total - 1));
+  }
+
+  function render(animatedIdx = null) {
+    boardEl.innerHTML = '';
+    tiles.forEach((val, idx) => {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      if (val !== 0) {
+        const btn = document.createElement('button');
+        btn.className = 'tile';
+        btn.disabled = won || !isAdjacentToEmpty(idx);
+        if (idx === animatedIdx) btn.classList.add('pop');
+        btn.addEventListener('click', () => handleMove(idx));
+
+        if (mode === 'photo' && photoDataUrl) {
+          const destRow = Math.floor((val - 1) / COLS);
+          const destCol = (val - 1) % COLS;
+          const posX = COLS === 1 ? 0 : (destCol / (COLS - 1)) * 100;
+          const posY = ROWS === 1 ? 0 : (destRow / (ROWS - 1)) * 100;
+          btn.style.backgroundImage = `url(${photoDataUrl})`;
+          btn.style.backgroundSize = `${COLS * 100}% ${ROWS * 100}%`;
+          btn.style.backgroundPosition = `${posX}% ${posY}%`;
+          btn.setAttribute('aria-label', `사진 조각 ${val}`);
+          const badge = document.createElement('span');
+          badge.className = 'tile-badge';
+          badge.textContent = val;
+          btn.appendChild(badge);
+        } else {
+          btn.style.setProperty('--hue', hueForValue(val));
+          btn.textContent = val;
+          btn.setAttribute('aria-label', `숫자 ${val} 블록`);
+        }
+
+        slot.appendChild(btn);
+      }
+      boardEl.appendChild(slot);
+    });
+    fitTileFont();
+  }
+
+  function fitTileFont() {
+    const slot = boardEl.querySelector('.slot');
+    if (!slot) return;
+    const size = slot.getBoundingClientRect().width;
+    if (size > 0) {
+      boardEl.style.setProperty('--tile-font', `${Math.max(14, Math.round(size * 0.4))}px`);
+    }
+  }
+
+  function handleMove(idx) {
+    if (won || !isAdjacentToEmpty(idx)) return;
+
+    if (!started) {
+      started = true;
+      startTimer();
+    }
+
+    const emptyIdx = tiles.indexOf(0);
+    [tiles[idx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[idx]];
+    moves++;
+    movesEl.textContent = moves;
+    render(emptyIdx);
+
+    if (isSolved(tiles)) {
+      won = true;
+      stopTimer();
+      winBanner.textContent = mode === 'photo' ? '🎉 완성! 사진을 다 맞췄어요' : '🎉 완성! 블록을 다 맞췄어요';
+      winBanner.classList.add('show');
+      const bestMap = loadBestMap();
+      const best = bestMap[level];
+      if (!best || moves < best.moves) {
+        bestMap[level] = { moves, seconds };
+        localStorage.setItem(BEST_KEY, JSON.stringify(bestMap));
+        renderBest();
+      }
+      render();
+      launchConfetti();
+    }
+  }
+
+  function applyLevelLayout() {
+    const cfg = DIFFICULTIES[level];
+    COLS = cfg.cols;
+    ROWS = cfg.rows;
+    SIZE = COLS * ROWS;
+    SOLVED = [...Array(SIZE - 1).keys()].map(n => n + 1).concat(0);
+
+    trayEl.style.maxWidth = `${cfg.trayMax}px`;
+    boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+    boardEl.style.gap = `${cfg.gap}px`;
+    boardEl.setAttribute('aria-label', `${cfg.label} 퍼즐판`);
+    updateSubtitle();
+
+    diffButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.level === level);
+      btn.setAttribute('aria-selected', String(btn.dataset.level === level));
+    });
+  }
+
+  function updateSubtitle() {
+    const total = SIZE - 1;
+    subtitleEl.textContent = mode === 'photo'
+      ? `빈칸 옆 조각을 눌러 사진을 완성해보세요 (${total}조각)`
+      : `빈칸 옆 블록을 눌러 1→${total} 순서로 밀어 넣으세요`;
+  }
+
+  function updatePhotoUI() {
+    photoRow.innerHTML = '';
+    if (!photoDataUrl) {
+      const wrap = document.createElement('div');
+      wrap.className = 'photo-setup';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'action btn-lamp';
+      btn.textContent = '📷 셀카로 퍼즐 만들기';
+      btn.addEventListener('click', () => photoInput.click());
+      wrap.appendChild(btn);
+      photoRow.appendChild(wrap);
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-active';
+
+    const thumb = document.createElement('img');
+    thumb.className = 'photo-thumb';
+    thumb.src = photoDataUrl;
+    thumb.alt = '촬영한 사진';
+    wrap.appendChild(thumb);
+
+    const text = document.createElement('div');
+    text.className = 'photo-active-text';
+    const title = document.createElement('strong');
+    title.textContent = mode === 'photo' ? '내 사진 퍼즐' : '내 사진 (번호 블록 보는 중)';
+    text.appendChild(title);
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'link-btn';
+    toggle.textContent = mode === 'photo' ? '번호 블록으로 보기' : '내 사진으로 보기';
+    toggle.addEventListener('click', toggleMode);
+    text.appendChild(toggle);
+    wrap.appendChild(text);
+
+    const retake = document.createElement('button');
+    retake.type = 'button';
+    retake.className = 'action btn-quiet';
+    retake.textContent = '다시 찍기';
+    retake.addEventListener('click', () => photoInput.click());
+    wrap.appendChild(retake);
+
+    photoRow.appendChild(wrap);
+  }
+
+  function toggleMode() {
+    mode = mode === 'photo' ? 'numbers' : 'photo';
+    updatePhotoUI();
+    updateSubtitle();
+    render();
+  }
+
+  function handlePhotoFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const OUT = 480;
+        const cropSize = Math.min(img.naturalWidth, img.naturalHeight);
+        const sx = (img.naturalWidth - cropSize) / 2;
+        const sy = (img.naturalHeight - cropSize) / 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = OUT;
+        canvas.height = OUT;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, OUT, OUT);
+        photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        mode = 'photo';
+        updatePhotoUI();
+        updateSubtitle();
+        newGame();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function newGame() {
+    applyLevelLayout();
+    tiles = shuffle();
+    moves = 0;
+    seconds = 0;
+    started = false;
+    won = false;
+    stopTimer();
+    timerEl.textContent = '00:00';
+    movesEl.textContent = '0';
+    winBanner.classList.remove('show');
+    renderBest();
+    render();
+  }
+
+  function setLevel(newLevel) {
+    if (!DIFFICULTIES[newLevel] || newLevel === level) return;
+    level = newLevel;
+    localStorage.setItem(LEVEL_KEY, level);
+    newGame();
+  }
+
+  function launchConfetti() {
+    // 동작 최소화 설정이어도 폭죽을 완전히 없애지 않고, 더 짧고 약하게만 보여준다.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const particleCount = reduced ? 50 : 150;
+    const duration = reduced ? 900 : 2600;
+    const spin = reduced ? 0 : 1;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483647;';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      function sizeCanvas() {
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      sizeCanvas();
+      window.addEventListener('resize', sizeCanvas);
+
+      const total = SIZE - 1;
+      const colors = Array.from({ length: total }, (_, i) => `hsl(${hueForValue(i + 1)} 70% 58%)`);
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight * 0.28;
+
+      const particles = Array.from({ length: particleCount }, () => {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 3 + Math.random() * 8;
+        return {
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 3,
+          size: 5 + Math.random() * 5,
+          rot: Math.random() * Math.PI * 2,
+          vr: (Math.random() - 0.5) * 0.35 * spin,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        };
+      });
+
+      const gravity = 0.2;
+      const start = performance.now();
+
+      function frame(now) {
+        const elapsed = now - start;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.vy += gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1 - elapsed / duration);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        });
+        if (elapsed < duration) {
+          requestAnimationFrame(frame);
+        } else {
+          window.removeEventListener('resize', sizeCanvas);
+          canvas.remove();
+        }
+      }
+      requestAnimationFrame(frame);
+    } catch (err) {
+      console.error('confetti failed to render', err);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (won) return;
+    const emptyIdx = tiles.indexOf(0);
+    const r = rowOf(emptyIdx);
+    const c = colOf(emptyIdx);
+    // 방향키는 "빈칸이 이동하는 방향"을 뜻하므로, 그 방향에 있는 블록을 빈칸으로 옮긴다.
+    if (e.key === 'ArrowUp' && r < ROWS - 1) handleMove(emptyIdx + COLS);
+    else if (e.key === 'ArrowDown' && r > 0) handleMove(emptyIdx - COLS);
+    else if (e.key === 'ArrowLeft' && c < COLS - 1) handleMove(emptyIdx + 1);
+    else if (e.key === 'ArrowRight' && c > 0) handleMove(emptyIdx - 1);
+    else return;
+    e.preventDefault();
+  });
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fitTileFont, 100);
+  });
+
+  diffButtons.forEach(btn => {
+    btn.addEventListener('click', () => setLevel(btn.dataset.level));
+  });
+  document.getElementById('shuffleBtn').addEventListener('click', newGame);
+  document.getElementById('resetBtn').addEventListener('click', newGame);
+  photoInput.addEventListener('change', () => {
+    handlePhotoFile(photoInput.files && photoInput.files[0]);
+    photoInput.value = '';
+  });
+
+  updatePhotoUI();
+  newGame();
+})();
+</script>
+</body>
+</html>
