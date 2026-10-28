@@ -371,6 +371,7 @@ function renderHome() {
       <div class="mascot" aria-hidden="true">${esc(state.avatar)}</div>
       <h1>숫자 놀이터</h1>
       <p>놀면서 수학이랑 친해져요!</p>
+      <div class="maker"><span class="maker-k">만든 곳</span><span class="maker-v">🏫 인덕과학기술고등학교</span></div>
     </div>
     <div class="card">
       <div class="field">
