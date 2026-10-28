@@ -24,7 +24,7 @@ const LEVELS = {
   mid: { label: '짱어려움', sub: '초등 3~4', icon: '🦅' },
 };
 
-const AVATARS = ['🦊', '🐯', '🐰', '🐼', '🐸', '🦄', '🐻', '🐧', '🐨', '🦁', '🐹', '🐙'];
+const AVATARS = ['🦊', '🐯', '🐰', '🐼', '🐱', '🦄', '🐻', '🐧', '🐨', '🦁', '🐹', '🐙'];
 
 const THINGS = [
   ['🍎', '사과'], ['⭐', '별'], ['🐟', '물고기'], ['🚗', '자동차'], ['🌸', '꽃'],
@@ -45,7 +45,7 @@ const store = {
 
 const state = {
   nickname: store.get('nickname', ''),
-  avatar: store.get('avatar', AVATARS[0]),
+  avatar: AVATARS.includes(store.get('avatar')) ? store.get('avatar') : AVATARS[0],
   level: store.get('level', 'k'),
   sound: store.get('sound', true),
   voice: store.get('voice', true),
