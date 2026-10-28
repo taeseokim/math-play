@@ -402,9 +402,9 @@
     </div>
 
     <div class="diff-row" role="tablist" aria-label="난이도 선택">
-      <button class="diff-btn" data-level="easy" role="tab">초급 3×3</button>
-      <button class="diff-btn" data-level="medium" role="tab">중급 4×4</button>
-      <button class="diff-btn" data-level="hard" role="tab">고급 5×5</button>
+      <button class="diff-btn" data-level="easy" role="tab">쉬움 3×3</button>
+      <button class="diff-btn" data-level="medium" role="tab">중간 4×4</button>
+      <button class="diff-btn" data-level="hard" role="tab">짱어려움 5×5</button>
     </div>
 
     <input type="file" id="photoInput" accept="image/*" capture="user" hidden>
@@ -425,9 +425,9 @@
 <script>
 (() => {
   const DIFFICULTIES = {
-    easy:   { cols: 3, rows: 3, label: '초급', trayMax: 420, gap: 9 },
-    medium: { cols: 4, rows: 4, label: '중급', trayMax: 460, gap: 7 },
-    hard:   { cols: 5, rows: 5, label: '고급', trayMax: 520, gap: 6 },
+    easy:   { cols: 3, rows: 3, label: '쉬움', trayMax: 420, gap: 9 },
+    medium: { cols: 4, rows: 4, label: '중간', trayMax: 460, gap: 7 },
+    hard:   { cols: 5, rows: 5, label: '짱어려움', trayMax: 520, gap: 6 },
   };
   const LEVEL_KEY = 'blockPuzzleLevel';
   const BEST_KEY = 'blockPuzzleBest';

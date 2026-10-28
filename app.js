@@ -19,9 +19,9 @@ const GAMES = {
 };
 
 const LEVELS = {
-  k:   { label: '유치원',  sub: '5~7세',   icon: '🐣' },
-  low: { label: '초등 1~2', sub: '학년',    icon: '🐥' },
-  mid: { label: '초등 3~4', sub: '학년',    icon: '🦅' },
+  k:   { label: '쉬움',     sub: '유치원',      icon: '🐣' },
+  low: { label: '중간',     sub: '초등 1~2', icon: '🐥' },
+  mid: { label: '짱어려움', sub: '초등 3~4', icon: '🦅' },
 };
 
 const AVATARS = ['🦊', '🐯', '🐰', '🐼', '🐸', '🦄', '🐻', '🐧', '🐨', '🦁', '🐹', '🐙'];
@@ -432,7 +432,7 @@ function renderPick() {
   <section class="screen">
     <div class="who">
       <span class="face">${esc(state.avatar)}</span>
-      <span>${esc(state.nickname)} · ${lv.label}${lv.sub === '학년' ? '학년' : ''}</span>
+      <span>${esc(state.nickname)} · ${lv.label}</span>
       <button class="ghost" id="change">바꾸기</button>
     </div>
     <h2 class="title">어떤 놀이를 할까요?</h2>
@@ -475,7 +475,7 @@ function renderEmbed(key) {
     </div>
     ${g.credit
       ? `<p class="note">출처: <a href="${url}" target="_blank" rel="noopener">${esc(g.credit)}</a> · 화면이 안 보이면 ‘새 창’을 눌러 주세요.</p>`
-      : `<p class="note">${esc(LEVELS[state.level].label)}${LEVELS[state.level].sub === '학년' ? '학년' : ''} 단계 · ${g.sizes ? g.sizes[state.level] : ''} 퍼즐이에요. 게임 안에서 난이도를 바꿀 수도 있어요.</p>`}
+      : `<p class="note">‘${esc(LEVELS[state.level].label)}’ 단계 · ${g.sizes ? g.sizes[state.level] : ''} 퍼즐이에요. 게임 안에서 난이도를 바꿀 수도 있어요.</p>`}
   </section>`;
   app.querySelector('#quit').onclick = () => { sfx.tap(); renderPick(); };
   if (g.intro) say(g.intro);
@@ -611,7 +611,7 @@ async function renderBoard(game, level) {
       ${Object.entries(GAMES).filter(([, g]) => !g.embed).map(([k, g]) => `<button class="tab" data-g="${k}" aria-pressed="${k === game}">${g.icon} ${g.title}</button>`).join('')}
     </div>
     <div class="tabs" role="group" aria-label="단계">
-      ${Object.entries(LEVELS).map(([k, l]) => `<button class="tab lv" data-l="${k}" aria-pressed="${k === level}">${l.icon} ${l.label}${l.sub === '학년' ? '학년' : ''}</button>`).join('')}
+      ${Object.entries(LEVELS).map(([k, l]) => `<button class="tab lv" data-l="${k}" aria-pressed="${k === level}">${l.icon} ${l.label}</button>`).join('')}
     </div>
     <ol class="board" id="board"><li class="empty" style="box-shadow:none;background:none;justify-content:center">불러오는 중…</li></ol>
     <p class="note" id="note"></p>

@@ -104,7 +104,7 @@ h1, h2, h3 { font-weight: 400; margin: 0; }
   display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 1.1rem;
 }
 .level .ic { font-size: 2.2rem; }
-.level .sub { font-size: .9rem; color: var(--ink-soft); }
+.level .sub { font-size: .9rem; color: var(--ink-soft); white-space: nowrap; }
 .level[aria-pressed="true"] { border-color: var(--blue); background: #E6EFFF; }
 
 .center { text-align: center; margin-top: 18px; }
