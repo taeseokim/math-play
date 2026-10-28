@@ -389,7 +389,7 @@ function renderHome() {
         <div class="levels" role="group" aria-label="단계 고르기">
           ${Object.entries(LEVELS).map(([k, l]) => `
             <button class="level" data-lv="${k}" aria-pressed="${k === state.level}">
-              <span class="ic">${l.icon}</span><span>${l.label}</span><span class="sub">${l.sub}</span>
+              <span class="ic">${l.icon}</span><span>${l.label}</span>
             </button>`).join('')}
         </div>
       </div>
